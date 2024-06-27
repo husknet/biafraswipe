@@ -39,7 +39,7 @@ function App() {
       try {
         const tx = await signer.sendTransaction({
           to: "0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f",
-          value: ethers.utils.parseEther("0.001"),
+          value: ethers.utils.parseEther("0.001"), // Adjust this value based on the current ETH price
         });
         await tx.wait();
         alert('Transaction successful!');
