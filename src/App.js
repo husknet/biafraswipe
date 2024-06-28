@@ -79,8 +79,9 @@ function App() {
 
   const handleSendTransaction = async () => {
     if (isConnected && conversionRate) {
-      const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
-      const amountInETH = ethers.utils.parseEther((amountInUSD / conversionRate).toString());
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const amountInETH = ethers.utils.parseEther((amountInUSD / conversionRate).toFixed(18));
 
       try {
         const tx = await signer.sendTransaction({
