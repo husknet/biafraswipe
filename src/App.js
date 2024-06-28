@@ -7,10 +7,8 @@ import { mainnet, goerli } from 'wagmi/chains';
 import { ethers } from 'ethers';
 import './App.css';
 
-// Define chains to be used
 const chains = [mainnet, goerli];
 
-// Configure wagmi client
 const { provider } = configureChains(chains, [w3mProvider({ projectId: 'c05e035e823a4769b62ae15c1cbe2f02' })]);
 const wagmiClient = createClient({
   autoConnect: true,
@@ -18,7 +16,6 @@ const wagmiClient = createClient({
   provider,
 });
 
-// Initialize Web3Modal Ethereum client
 const ethereumClient = new EthereumClient(wagmiClient, chains);
 
 function App() {
