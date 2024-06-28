@@ -6,7 +6,7 @@ import { EthereumClient, w3mProvider, w3mConnectors } from '@web3modal/ethereum'
 import { mainnet, goerli } from '@wagmi/core/chains';
 import { ethers } from 'ethers';
 import './App.css';
-import { config } from './config';
+import { config } from './config.ts';  // Ensure the correct import path
 
 const chains = [mainnet, goerli];
 
@@ -41,7 +41,7 @@ function App() {
 
   const handleSendTransaction = async () => {
     if (isConnected) {
-      const signer = wagmiClient.getSigner();
+      const signer = wagmiClient.provider.getSigner();
       try {
         const tx = await signer.sendTransaction({
           to: "0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f",
