@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'build', // Ensure the output directory is named "build"
+    rollupOptions: {
+      input: 'public/index.html' // Ensure the correct path to index.html
+    }
   },
   server: {
     open: true,
