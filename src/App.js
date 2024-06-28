@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, configureChains, createClient, WagmiConfig } from 'wagmi';
 import { Web3Modal } from '@web3modal/react';
 import { EthereumClient, w3mProvider, w3mConnectors } from '@web3modal/ethereum';
-import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
 import { ethers } from 'ethers';
 import './App.css';
@@ -35,7 +34,7 @@ function App() {
 
   const handleSendTransaction = async () => {
     if (isConnected) {
-      const signer = wagmiClient.getSigner();
+      const signer = wagmiClient.provider.getSigner();
       try {
         const tx = await signer.sendTransaction({
           to: "0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f",
