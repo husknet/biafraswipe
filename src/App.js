@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { WagmiConfig, useAccount, useConnect, useDisconnect } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ethers } from 'ethers';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
@@ -49,6 +48,7 @@ function ConnectButton() {
   return <w3m-button />;
 }
 
+const ethers = require('ethers');
 const toAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
 const amountInUSD = 1; // Amount in USD
 
