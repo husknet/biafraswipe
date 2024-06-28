@@ -1,87 +1,103 @@
 // src/App.js
 import React, { useEffect, useState } from 'react';
-import { useAccount, useConnect, useDisconnect, WagmiConfig } from '@wagmi/core';
-import { Web3Modal } from '@web3modal/react';
-import { EthereumClient, w3mProvider, w3mConnectors } from '@web3modal/ethereum';
-import { mainnet, goerli } from '@wagmi/core/chains';
+import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
+import { WagmiConfig, useAccount, useConnect, useDisconnect, configureChains, createClient } from 'wagmi';
+import { mainnet, goerli } from 'viem/chains';
 import { ethers } from 'ethers';
 import './App.css';
-import { config } from './config.ts';  // Ensure the correct import path
+
+// 1. Use your Project ID from WalletConnect Cloud
+const projectId = '1c1db7ada235d88816f2f0008d415fdc';
+
+// 2. Create wagmiConfig
+const metadata = {
+  name: 'BiafraSwipe',
+  description: 'BiafraSwipe Description',
+  url: 'https://mywebsite.com',
+  icons: ['https://avatars.mywebsite.com/'],
+};
 
 const chains = [mainnet, goerli];
+const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
 
-const { provider } = configureChains(chains, [w3mProvider({ projectId: 'c05e035e823a4769b62ae15c1cbe2f02' })]);
-const wagmiClient = createClient({
-  autoConnect: true,
-  connectors: w3mConnectors({ projectId: 'c05e035e823a4769b62ae15c1cbe2f02', version: 1, chains }),
-  provider,
+// 3. Create modal
+createWeb3Modal({
+  wagmiConfig,
+  projectId,
+  chains,
+  defaultChain: mainnet,
 });
 
-const ethereumClient = new EthereumClient(wagmiClient, chains);
+function ConnectButton() {
+  return <w3m-button />;
+}
+
+const toAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
+const amountInUSD = 1; // Amount in USD
 
 function App() {
+  const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const { address, isConnected } = useAccount();
-  const [ensName, setEnsName] = useState('');
+  const [conversionRate, setConversionRate] = useState(null);
 
   useEffect(() => {
-    const fetchEnsName = async () => {
-      if (address) {
-        const name = await getEnsName(config, { address });
-        setEnsName(name);
+    // Fetch the conversion rate from ETH to USD
+    const fetchConversionRate = async () => {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+        const data = await response.json();
+        setConversionRate(data.ethereum.usd);
+      } catch (error) {
+        console.error('Error fetching conversion rate:', error);
       }
     };
-    fetchEnsName();
-  }, [address]);
+
+    fetchConversionRate();
+  }, []);
 
   const handleConnect = () => {
     connect({ connector: connectors[0] });
   };
 
   const handleSendTransaction = async () => {
-    if (isConnected) {
-      const signer = wagmiClient.provider.getSigner();
+    if (isConnected && conversionRate) {
+      const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+      const amountInETH = ethers.utils.parseEther((amountInUSD / conversionRate).toString());
+
       try {
         const tx = await signer.sendTransaction({
-          to: "0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f",
-          value: ethers.utils.parseEther("0.001"), // Adjust this value based on the current ETH price
+          to: toAddress,
+          value: amountInETH,
         });
         await tx.wait();
         alert('Transaction successful!');
       } catch (error) {
-        console.error("Transaction failed:", error);
+        console.error('Transaction failed:', error);
         alert('Transaction failed. Please try again.');
       }
     }
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>WalletConnect App</h1>
-        {isConnected ? (
-          <>
-            <p>Connected account: {address}</p>
-            {ensName && <p>ENS Name: {ensName}</p>}
-            <button onClick={handleSendTransaction}>Send $1 Ether</button>
-            <button onClick={disconnect}>Disconnect Wallet</button>
-          </>
-        ) : (
-          <button onClick={handleConnect}>Connect Wallet</button>
-        )}
-      </header>
-      <Web3Modal projectId="c05e035e823a4769b62ae15c1cbe2f02" ethereumClient={ethereumClient} />
-    </div>
-  );
-}
-
-function WrappedApp() {
-  return (
-    <WagmiConfig config={config}>
-      <App />
+    <WagmiConfig config={wagmiConfig}>
+      <div className="App">
+        <header className="App-header">
+          <h1>WalletConnect App</h1>
+          {isConnected ? (
+            <>
+              <p>Connected account: {address}</p>
+              <button onClick={handleSendTransaction}>Send $1 Ether</button>
+              <button onClick={disconnect}>Disconnect Wallet</button>
+            </>
+          ) : (
+            <button onClick={handleConnect}>Connect Wallet</button>
+          )}
+        </header>
+        <ConnectButton />
+      </div>
     </WagmiConfig>
   );
 }
 
-export default WrappedApp;
+export default App;
