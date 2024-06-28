@@ -1,15 +1,20 @@
 // src/App.js
 import React, { useEffect, useState } from 'react';
-import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
-import { WagmiConfig, useAccount, useConnect, useDisconnect, configureChains, createClient } from 'wagmi';
-import { mainnet, goerli } from 'viem/chains';
+import { WagmiConfig, useAccount, useConnect, useDisconnect } from 'wagmi';
+import { mainnet, goerli } from 'wagmi/chains';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ethers } from 'ethers';
+import { createWeb3Modal } from '@web3modal/wagmi/react';
+import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
 
-// 1. Use your Project ID from WalletConnect Cloud
+// Setup QueryClient
+const queryClient = new QueryClient();
+
+// Use your Project ID from WalletConnect Cloud
 const projectId = '1c1db7ada235d88816f2f0008d415fdc';
 
-// 2. Create wagmiConfig
+// Create wagmiConfig
 const metadata = {
   name: 'BiafraSwipe',
   description: 'BiafraSwipe Description',
@@ -18,15 +23,27 @@ const metadata = {
 };
 
 const chains = [mainnet, goerli];
-const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
-
-// 3. Create modal
-createWeb3Modal({
-  wagmiConfig,
-  projectId,
+const config = defaultWagmiConfig({
   chains,
-  defaultChain: mainnet,
+  projectId,
+  metadata,
 });
+
+// Create modal
+createWeb3Modal({
+  wagmiConfig: config,
+  projectId,
+  enableAnalytics: true, // Optional - defaults to your Cloud configuration
+  enableOnramp: true, // Optional - false as default
+});
+
+export function Web3ModalProvider({ children }) {
+  return (
+    <WagmiConfig config={config}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WagmiConfig>
+  );
+}
 
 function ConnectButton() {
   return <w3m-button />;
@@ -80,7 +97,7 @@ function App() {
   };
 
   return (
-    <WagmiConfig config={wagmiConfig}>
+    <Web3ModalProvider>
       <div className="App">
         <header className="App-header">
           <h1>WalletConnect App</h1>
@@ -96,7 +113,7 @@ function App() {
         </header>
         <ConnectButton />
       </div>
-    </WagmiConfig>
+    </Web3ModalProvider>
   );
 }
 
