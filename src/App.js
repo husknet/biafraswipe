@@ -35,7 +35,7 @@ function App() {
 
   const handleSendTransaction = async () => {
     if (isConnected) {
-      const signer = wagmiClient.provider.getSigner();
+      const signer = wagmiClient.getSigner();
       try {
         const tx = await signer.sendTransaction({
           to: "0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f",
