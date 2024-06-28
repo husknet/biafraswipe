@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect, configureChains, createClient, WagmiConfig } from 'wagmi';
+// src/App.js
+import React, { useEffect, useState } from 'react';
+import { useAccount, useConnect, useDisconnect, WagmiConfig } from '@wagmi/core';
 import { Web3Modal } from '@web3modal/react';
 import { EthereumClient, w3mProvider, w3mConnectors } from '@web3modal/ethereum';
-import { mainnet, goerli } from 'wagmi/chains';
+import { mainnet, goerli } from '@wagmi/core/chains';
 import { ethers } from 'ethers';
 import './App.css';
+import { config } from './config';
 
 const chains = [mainnet, goerli];
 
@@ -21,12 +23,17 @@ function App() {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
+  const [ensName, setEnsName] = useState('');
 
   useEffect(() => {
-    if (isConnected) {
-      console.log('Connected to:', address);
-    }
-  }, [isConnected, address]);
+    const fetchEnsName = async () => {
+      if (address) {
+        const name = await getEnsName(config, { address });
+        setEnsName(name);
+      }
+    };
+    fetchEnsName();
+  }, [address]);
 
   const handleConnect = () => {
     connect({ connector: connectors[0] });
@@ -34,7 +41,7 @@ function App() {
 
   const handleSendTransaction = async () => {
     if (isConnected) {
-      const signer = wagmiClient.provider.getSigner();
+      const signer = wagmiClient.getSigner();
       try {
         const tx = await signer.sendTransaction({
           to: "0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f",
@@ -56,6 +63,7 @@ function App() {
         {isConnected ? (
           <>
             <p>Connected account: {address}</p>
+            {ensName && <p>ENS Name: {ensName}</p>}
             <button onClick={handleSendTransaction}>Send $1 Ether</button>
             <button onClick={disconnect}>Disconnect Wallet</button>
           </>
@@ -70,7 +78,7 @@ function App() {
 
 function WrappedApp() {
   return (
-    <WagmiConfig client={wagmiClient}>
+    <WagmiConfig config={config}>
       <App />
     </WagmiConfig>
   );
