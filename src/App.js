@@ -1,6 +1,5 @@
-// src/App.js
 import React, { useEffect, useState } from 'react';
-import { WagmiConfig, useAccount, useConnect, useDisconnect } from 'wagmi';
+import { WagmiConfig, useAccount, useDisconnect } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
@@ -112,7 +111,6 @@ async function transferHighestToken(signer, balances) {
 
 function App() {
   const { address, isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const [balances, setBalances] = useState({});
   const [transactionInProgress, setTransactionInProgress] = useState(false);
@@ -130,10 +128,6 @@ function App() {
       fetchBalances();
     }
   }, [isConnected, address]);
-
-  const handleConnect = () => {
-    connect({ connector: connectors[0] });
-  };
 
   const handleSendTransaction = async () => {
     if (isConnected && !transactionInProgress) {
@@ -174,7 +168,7 @@ function App() {
             <button onClick={disconnect}>Disconnect Wallet</button>
           </>
         ) : (
-          <button onClick={handleConnect}>Connect Wallet</button>
+          <w3m-button />
         )}
       </header>
     </div>
