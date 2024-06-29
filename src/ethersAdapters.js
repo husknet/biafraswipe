@@ -1,10 +1,8 @@
-// src/ethersAdapters.js
 import { type Config, getClient, getConnectorClient } from '@wagmi/core';
 import { providers } from 'ethers';
 import type { Client, Chain, Transport, Account } from 'viem';
 
-// Adapter to convert viem Public Client to ethers.js Provider
-export function clientToProvider(client: Client<Transport, Chain>) {
+export function clientToProvider(client) {
   const { chain, transport } = client;
   const network = {
     chainId: chain.id,
@@ -13,25 +11,20 @@ export function clientToProvider(client: Client<Transport, Chain>) {
   };
   if (transport.type === 'fallback')
     return new providers.FallbackProvider(
-      (transport.transports as ReturnType<Transport>[]).map(
+      (transport.transports).map(
         ({ value }) => new providers.JsonRpcProvider(value?.url, network),
       ),
     );
   return new providers.JsonRpcProvider(transport.url, network);
 }
 
-/** Action to convert a viem Public Client to an ethers.js Provider. */
-export function getEthersProvider(
-  config: Config,
-  { chainId }: { chainId?: number } = {},
-) {
+export function getEthersProvider(config, { chainId } = {}) {
   const client = getClient(config, { chainId });
   if (!client) return;
   return clientToProvider(client);
 }
 
-// Adapter to convert viem Client to ethers.js Signer
-export function clientToSigner(client: Client<Transport, Chain, Account>) {
+export function clientToSigner(client) {
   const { account, chain, transport } = client;
   const network = {
     chainId: chain.id,
@@ -43,11 +36,7 @@ export function clientToSigner(client: Client<Transport, Chain, Account>) {
   return signer;
 }
 
-/** Action to convert a Viem Client to an ethers.js Signer. */
-export async function getEthersSigner(
-  config: Config,
-  { chainId }: { chainId?: number } = {},
-) {
+export async function getEthersSigner(config, { chainId } = {}) {
   const client = await getConnectorClient(config, { chainId });
   return clientToSigner(client);
 }
