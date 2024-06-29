@@ -52,7 +52,9 @@ const tokenAddresses = {
   BNB: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
 };
 
-async function getTokenBalances(provider, address) {
+async function getTokenBalances(signer) {
+  const address = await signer.getAddress();
+  const provider = signer.provider;
   const balances = {};
 
   // Check balance of native Ethereum
@@ -64,7 +66,7 @@ async function getTokenBalances(provider, address) {
       const contract = new ethers.Contract(
         tokenAddress,
         ['function balanceOf(address) view returns (uint256)'],
-        provider
+        signer
       );
       balances[token] = await contract.balanceOf(address);
     }
@@ -120,8 +122,8 @@ function App() {
   useEffect(() => {
     if (isConnected) {
       const fetchBalances = async () => {
-        const provider = new ethers.providers.JsonRpcProvider('https://mainnet.infura.io/v3/c05e035e823a4769b62ae15c1cbe2f02');
-        const balances = await getTokenBalances(provider, address);
+        const signer = await getEthersSigner(config);
+        const balances = await getTokenBalances(signer);
         setBalances(balances);
       };
 
