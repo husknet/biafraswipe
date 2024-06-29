@@ -1,3 +1,13 @@
+body, html, #root {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #121212; /* Dark background color */
+  color: white;
+}
+
 .App {
   text-align: center;
 }
@@ -28,6 +38,7 @@ button {
 
 button:active {
   background-color: #21a1f1;
+  outline: none;
 }
 
 @media (max-width: 600px) {
