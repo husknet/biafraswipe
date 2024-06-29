@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
-import { getEthersProvider, getEthersSigner } from './ethersAdapters';
+import { getEthersSigner } from './ethersAdapters';
 
 const queryClient = new QueryClient();
 const projectId = '1c1db7ada235d88816f2f0008d415fdc';
