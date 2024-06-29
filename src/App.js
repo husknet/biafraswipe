@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useEffect, useState } from 'react';
 import { WagmiConfig, useAccount, useDisconnect } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
