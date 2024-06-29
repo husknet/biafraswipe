@@ -6,7 +6,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
+import { getEthersProvider, getEthersSigner } from './ethersAdapters';
 
+// Setup QueryClient
 const queryClient = new QueryClient();
 const projectId = '1c1db7ada235d88816f2f0008d415fdc';
 const metadata = {
@@ -41,7 +43,6 @@ function ConnectButton() {
   return <w3m-button />;
 }
 
-const ethers = require('ethers');
 const toAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
 const amountInUSD = 1;
 
@@ -71,8 +72,8 @@ function App() {
 
   const handleSendTransaction = async () => {
     if (isConnected && conversionRate) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      const provider = getEthersProvider(config);
+      const signer = await getEthersSigner(config);
       const amountInETH = ethers.utils.parseEther((amountInUSD / conversionRate).toFixed(18));
 
       try {
