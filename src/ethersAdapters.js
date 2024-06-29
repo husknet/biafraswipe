@@ -1,6 +1,6 @@
-import { type Config, getClient, getConnectorClient } from '@wagmi/core';
+// src/ethersAdapters.js
+import { getClient, getConnectorClient } from '@wagmi/core';
 import { providers } from 'ethers';
-import type { Client, Chain, Transport, Account } from 'viem';
 
 export function clientToProvider(client) {
   const { chain, transport } = client;
