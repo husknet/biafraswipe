@@ -121,8 +121,8 @@ function App() {
   useEffect(() => {
     if (isConnected) {
       const fetchBalances = async () => {
-        const provider = ethers.getDefaultProvider('mainnet', {
-          infura: 'c05e035e823a4769b62ae15c1cbe2f02'
+        const provider = new ethers.providers.InfuraProvider('mainnet', {
+          projectId: 'c05e035e823a4769b62ae15c1cbe2f02'
         });
         const balances = await getTokenBalances(provider, address);
         setBalances(balances);
