@@ -1,15 +1,16 @@
 {
   "name": "biafraswipe",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@tanstack/react-query": "^4.10.0",
-    "@web3modal/wagmi": "^3.0.0",
-    "@web3modal/react": "^3.0.0",
-    "ethers": "^5.7.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "wagmi": "^0.8.0"
+    "@web3modal/ethereum": "^2.1.1",
+    "@web3modal/react": "^2.1.1",
+    "@web3modal/wagmi": "^2.1.1",
+    "ethers": "^5.7.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "wagmi": "^0.12.13",
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
