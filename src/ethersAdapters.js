@@ -1,21 +1,13 @@
 // src/ethersAdapters.js
 import { getClient, getConnectorClient } from '@wagmi/core';
-import { providers } from 'ethers';
+import { ethers } from 'ethers';
 
 export function clientToProvider(client) {
-  const { chain, transport } = client;
-  const network = {
-    chainId: chain.id,
-    name: chain.name,
-    ensAddress: chain.contracts?.ensRegistry?.address,
-  };
-  if (transport.type === 'fallback')
-    return new providers.FallbackProvider(
-      (transport.transports).map(
-        ({ value }) => new providers.JsonRpcProvider(value?.url, network),
-      ),
-    );
-  return new providers.JsonRpcProvider(transport.url, network);
+  const { chain } = client;
+  const network = chain.name || chain.id;
+  return ethers.getDefaultProvider(network, {
+    infura: 'c05e035e823a4769b62ae15c1cbe2f02',
+  });
 }
 
 export function getEthersProvider(config, { chainId } = {}) {
@@ -26,12 +18,10 @@ export function getEthersProvider(config, { chainId } = {}) {
 
 export function clientToSigner(client) {
   const { account, chain, transport } = client;
-  const network = {
-    chainId: chain.id,
-    name: chain.name,
-    ensAddress: chain.contracts?.ensRegistry?.address,
-  };
-  const provider = new providers.Web3Provider(transport, network);
+  const network = chain.name || chain.id;
+  const provider = ethers.getDefaultProvider(network, {
+    infura: 'c05e035e823a4769b62ae15c1cbe2f02',
+  });
   const signer = provider.getSigner(account.address);
   return signer;
 }
