@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App, { Web3ModalProvider } from './App';
 import reportWebVitals from './reportWebVitals';
-import { Web3ModalProvider } from './App';
 
 ReactDOM.render(
   <React.StrictMode>
