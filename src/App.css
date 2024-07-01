@@ -20,7 +20,7 @@ body, html, #root {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: 10px; /* Reduced font size */
   color: white;
   padding: 20px;
   box-sizing: border-box;
