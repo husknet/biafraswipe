@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { WagmiConfig, useAccount, useDisconnect } from 'wagmi';
-import { mainnet, goerli } from 'wagmi/chains';
+import { mainnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
@@ -20,7 +20,7 @@ const metadata = {
   url: 'https://mywebsite.com',
   icons: ['https://avatars.mywebsite.com/'],
 };
-const chains = [mainnet, goerli];
+const chains = [mainnet];
 const config = defaultWagmiConfig({
   chains,
   projectId,
