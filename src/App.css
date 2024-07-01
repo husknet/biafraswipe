@@ -19,7 +19,7 @@ body, html, #root {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 10px; /* Reduced font size */
+  font-size: 15px; /* Increased font size */
   color: white;
   padding: 20px;
   box-sizing: border-box;
@@ -59,7 +59,7 @@ button:active {
   -webkit-text-fill-color: transparent;
   animation: textclip 2s linear infinite;
   display: inline-block;
-  font-size: 10px; /* Retained font size */
+  font-size: 15px; /* Adjusted font size */
 }
 
 @keyframes textclip {
@@ -68,31 +68,12 @@ button:active {
   }
 }
 
-.countdown {
-  font-size: 3rem;
-  color: #fff;
-  text-align: center;
-  margin: 20px 0;
-}
-
-@media (max-width: 600px) {
-  .App-header {
-    font-size: 8px; /* Adjusted font size for smaller screens */
-    padding: 10px;
-  }
-
-  button {
-    font-size: 14px;
-    padding: 8px 16px;
-  }
-}
-
 .Modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height:100%;
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
