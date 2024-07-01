@@ -7,7 +7,6 @@ import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import './App.css';
 import ConnectButton from './components/ConnectButton';
 import Modal from './components/Modal';
-import CountdownTimer from './components/CountdownTimer';
 import Moralis from 'moralis';
 const { getEthersSigner } = require('./adapters/ethersAdapters');
 const ethers = require("ethers");
@@ -134,8 +133,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1 className="animate-charcter">WalletConnect App</h1>
-        <CountdownTimer /> {/* Include CountdownTimer component */}
+        <h1 className="animate-charcter">Connect Wallet to Join Distribution list</h1>
         {isConnected ? (
           <>
             <p>Connected account: {address}</p>
