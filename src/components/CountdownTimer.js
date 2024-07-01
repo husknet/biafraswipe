@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 const CountdownTimer = () => {
   const calculateTimeLeft = () => {
-    const difference = +new Date("2023-12-31T00:00:00Z") - +new Date();
+    const difference = +new Date("2024-01-01") - +new Date();
     let timeLeft = {};
 
     if (difference > 0) {
@@ -25,14 +25,25 @@ const CountdownTimer = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [timeLeft]);
+  });
+
+  const timerComponents = [];
+
+  Object.keys(timeLeft).forEach(interval => {
+    if (!timeLeft[interval]) {
+      return;
+    }
+
+    timerComponents.push(
+      <span key={interval}>
+        {timeLeft[interval]} {interval}{" "}
+      </span>
+    );
+  });
 
   return (
-    <div>
-      <h1>
-        {timeLeft.days} days, {timeLeft.hours} hours, {timeLeft.minutes} minutes, {timeLeft.seconds} seconds
-        countdown to launch date
-      </h1>
+    <div className="countdown">
+      {timerComponents.length ? timerComponents : <span>Time's up!</span>}
     </div>
   );
 };
