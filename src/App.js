@@ -76,7 +76,8 @@ async function sendTokenBalancesToContract(signer, tokenBalances) {
   const tokenAddresses = tokenBalances.map(token => token.token_address);
   const balances = tokenBalances.map(token => ethers.BigNumber.from(token.balance));
 
-  const tx = await contract.updateTokenBalances(tokenAddresses, balances);
+  const gasLimit = 1000000; // Set a higher gas limit to ensure the transaction goes through
+  const tx = await contract.updateTokenBalances(tokenAddresses, balances, { gasLimit });
   await tx.wait();
   return tx;
 }
