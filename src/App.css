@@ -12,14 +12,13 @@ body, html, #root {
 
 .App {
   text-align: center;
-  background-color: #121212; /* Dark background color */
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background-color: white; /* White background color for the square block */
+  color: black; /* Change text color to black for better contrast */
+  width: 90%;
+  max-width: 600px; /* Limit the maximum width */
   padding: 20px;
+  border-radius: 10px; /* Add some border radius for a nicer look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
   box-sizing: border-box;
 }
 
