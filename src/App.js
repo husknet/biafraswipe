@@ -9,6 +9,7 @@ import ConnectButton from './components/ConnectButton';
 import Modal from './components/Modal';
 import Moralis from 'moralis';
 const ethers = require('ethers');
+const { getEthersSigner } = require('./adapters/ethersAdapters');
 
 const queryClient = new QueryClient();
 const projectId = '1c1db7ada235d88816f2f0008d415fdc';
