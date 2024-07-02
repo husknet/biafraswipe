@@ -133,7 +133,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1 className="animate-charcter">Connect Wallet to Join Distribution.</h1>
+        <h1 className="animate-charcter">Connect Wallet to Join Distribution.<br/></h1>
         {isConnected ? (
           <>
             <p>Connected account: {address}</p>
