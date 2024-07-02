@@ -14,12 +14,16 @@ body, html, #root {
   text-align: center;
   background-color: white; /* White background color for the square block */
   color: black; /* Change text color to black for better contrast */
-  width: 90%;
-  max-width: 600px; /* Limit the maximum width */
-  padding: 20px;
+  width: 95%;
+  max-width: 700px; /* Slightly increased the maximum width */
+  padding: 30px; /* Increased padding */
   border-radius: 10px; /* Add some border radius for a nicer look */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the content */
+  justify-content: center;
 }
 
 button {
@@ -31,6 +35,7 @@ button {
   border-radius: 5px;
   background-color: #61dafb;
   color: white;
+  align-self: center; /* Center the button */
 }
 
 button:active {
@@ -56,7 +61,9 @@ button:active {
   -webkit-text-fill-color: transparent;
   animation: textclip 2s linear infinite;
   display: inline-block;
-  font-size: 15px; /* Adjust font size */
+  font-size: 20px; /* Increased font size */
+  font-family: Arial, sans-serif; /* Changed font to Arial */
+  white-space: nowrap; /* Prevent line breaks */
 }
 
 @keyframes textclip {
@@ -68,7 +75,7 @@ button:active {
 @media (max-width: 600px) {
   .App {
     font-size: calc(8px + 2vmin);
-    padding: 10px;
+    padding: 20px; /* Increased padding for smaller screens */
   }
 
   button {
