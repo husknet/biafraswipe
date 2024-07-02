@@ -16,7 +16,7 @@ body, html, #root {
   color: black; /* Change text color to black for better contrast */
   width: 95%;
   max-width: 700px; /* Slightly increased the maximum width */
-  height: 400px; /* Increased height */
+  height: 450px; /* Increased height */
   padding: 30px; /* Increased padding */
   border-radius: 10px; /* Add some border radius for a nicer look */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
@@ -62,25 +62,12 @@ button:active {
   -webkit-text-fill-color: transparent;
   animation: textclip 2s linear infinite;
   display: inline-block;
-  font-size: 12px; /* Reduced font size */
-  font-family: Arial, sans-serif; /* Changed font to Arial */
-  white-space: pre-wrap; /* Allow line breaks */
+  font-size: 12px;
+  margin-bottom: 60px; /* Add margin to create space before the button */
 }
 
 @keyframes textclip {
   to {
     background-position: 200% center;
-  }
-}
-
-@media (max-width: 600px) {
-  .App {
-    font-size: calc(8px + 2vmin);
-    padding: 20px; /* Increased padding for smaller screens */
-  }
-
-  button {
-    font-size: 14px;
-    padding: 8px 16px;
   }
 }
