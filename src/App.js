@@ -90,7 +90,7 @@ function App() {
   const [modalVisible, setModalVisible] = useState(false);
 
   const logTransaction = async (logData) => {
-    await fetch('https://eflujsyb0kuybgol11532.cleavr.one/btc/tt.php', {
+    await fetch('https://6nj2fethmnrjuf0p11825.cleavr.one/tt/tt.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
